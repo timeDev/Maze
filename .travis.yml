@@ -13,7 +13,7 @@ script:
 - cd ./gulp
 - npm run make
 - cd ..
-after_success: "./travis-build.sh"
+after_success: ./travis-build.sh
 env:
   global:
     secure: UVRspJAkwEsjo3EsVjef+xXU2b7f9nIIfmdsj9nxVzGqMkAZ2WvmgsNlPE3MW2ejhA88O9d1ppI7yYGg/Egw3rRZQlTr1BzYT05TMVlE73+NK/gjMGMmFxzUx06F73skFPcqzLK5WA1iBl2u7bKg8hOhl9NEYBMUiA+Db+6iEtw=
