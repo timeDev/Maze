@@ -1,5 +1,5 @@
 {
-  "name": "uttt-gulp-build",
+  "name": "maze-gulp-build",
   "version": "0.0.1",
   "devDependencies": {
     "browserify": "^7.0.0",
@@ -13,5 +13,8 @@
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.0.0",
     "watchify": "^2.1.1"
+  },
+  "scripts": {
+    "make": "gulp make"
   }
 }

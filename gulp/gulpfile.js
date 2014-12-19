@@ -81,7 +81,7 @@ gulp.task('build', ['clean', 'watchify'], function () {
         .pipe(gulp.dest('../build'));
 });
 
-gulp.task('make', function () {
+gulp.task('make', ['clean'], function () {
     browserify({
         entries: ['../src/js/main.js'],
         baseDir: './../src/js',
