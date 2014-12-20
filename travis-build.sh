@@ -2,7 +2,7 @@
 git clone $REPO_URL temp
 cd temp
 git checkout gh-pages
-cp -r ../build ./
+cp -r ../build/ ./
 git add -A
 git config user.name "Travis Build"
 git config user.email "oshomburg@gmail.com"
