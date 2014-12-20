@@ -5,6 +5,7 @@ before_install:
 - export TRAVIS_COMMIT_MSG="$(git log --format=%B --no-merges -n 1)"
 - export REPO_URL=https://$GH_TOKEN@github.com/timedev/Maze.git
 - echo $TRAVIS_COMMIT_MSG
+- chmode +x ./travis-build.sh
 install:
 - cd ./gulp
 - npm install
