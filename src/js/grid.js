@@ -23,29 +23,86 @@
  */
 /*global require, module, exports */
 var
-    rows,
-    width = 20,
-    height = 20;
+    regions,
+    chunkSize = 16;
+
 
 exports.clear = function () {
-    exports.rows = rows = [];
-    for (var i = 0; i < height; i++) {
+    exports.regions = regions = [];
+    regions[0] = []; // +x +y
+    regions[1] = []; // -x +y
+    regions[2] = []; // +x -y
+    regions[3] = []; // -x -y
+};
+
+exports.makeChunk = function (x, y) {
+    var rows = [];
+    for (var i = 0; i < chunkSize; i++) {
         rows[i] = [];
-        for (var j = 0; j < width; j++) {
-            rows[i][j] = exports.makeCell(j, i);
+        for (var j = 0; j < chunkSize; j++) {
+            rows[i][j] = exports.makeCell(x * 16 + j, y * 16 + i);
         }
     }
+    // Get region number.
+    var r = 0;
+    if (x < 0) {
+        r++;
+    }
+    if (y < 0) {
+        r += 2;
+    }
+    // Get the coordinates of the chunk inside the region
+    var rx = x < 0 ? Math.abs(x + 1) : x,
+        ry = y < 0 ? Math.abs(y + 1) : y;
+
+    // Make the row if it does not exist yet
+    if (!regions[r][ry]) {
+        regions[r][ry] = [];
+    }
+    regions[r][ry][rx] = rows;
+};
+
+exports.getCellAt = function (x, y) {
+    // Coordinates relative to the chunk start
+    var cx = x % chunkSize,
+        cy = y % chunkSize;
+    // Coordinates of the chunk in the world
+    var wx = Math.floor(x / chunkSize),
+        wy = Math.floor(y / chunkSize);
+    // Region number
+    var r = 0;
+    if (x < 0) {
+        r++;
+    }
+    if (y < 0) {
+        r += 2;
+    }
+    // Coordinates of the chunk in the region
+    var rx = wx < 0 ? Math.abs(wx + 1) : wx,
+        ry = wy < 0 ? Math.abs(wy + 1) : wy;
+    if (!regions[r][ry] || !regions[r][ry][rx]) {
+        return null;
+    }
+    return regions[r][ry][rx][cy][cx];
 };
 
 exports.cells = function () {
-    var array = [];
-    for (var i = 0; i < rows.length; i++) {
-        array = array.concat(rows[i]);
+    var array = [], chunk, r, ry, rx, cy;
+    for (r = 0; r < regions.length; r++) {
+        for (ry = 0; ry < regions[r].length; ry++) {
+            for (rx = 0; rx < regions[r][ry].length; rx++) {
+                chunk = regions[r][ry][rx];
+                for (cy = 0; cy < chunk.length; cy++) {
+                    array = array.concat(chunk[cy]);
+                }
+            }
+        }
     }
     return array;
 };
 
 exports.makeCell = function (x, y) {
+    var neighbors = [[x - 1, y], [x + 1, y], [x, y - 1], [x, y + 1]];
     return {
         x: x,
         y: y,
@@ -55,37 +112,30 @@ exports.makeCell = function (x, y) {
         left: false,
 
         neighbors: function () {
-            var neighbors = [];
-            if (x > 0) {
-                neighbors.push(rows[y][x - 1]);
-            }
-            if (x + 1 < width) {
-                neighbors.push(rows[y][x + 1]);
-            }
-            if (y > 0) {
-                neighbors.push(rows[y - 1][x]);
-            }
-            if (y + 1 < height) {
-                neighbors.push(rows[y + 1][x]);
-            }
-            return neighbors;
+            return neighbors.map(function (a) {
+                return exports.getCellAt.apply(exports, a);
+            }).filter(function (c) {
+                return c !== null;
+            });
         },
 
         connections: function () {
             var connections = [];
             if (this.up) {
-                connections.push(rows[y - 1][x]);
+                connections.push(exports.getCellAt(x, y - 1));
             }
             if (this.down) {
-                connections.push(rows[y + 1][x]);
+                connections.push(exports.getCellAt(x, y + 1));
             }
             if (this.left) {
-                connections.push(rows[y][x - 1]);
+                connections.push(exports.getCellAt(x - 1, y));
             }
             if (this.right) {
-                connections.push(rows[y][x + 1]);
+                connections.push(exports.getCellAt(x + 1, y));
             }
-            return connections;
+            return connections.filter(function (c) {
+                return c !== null;
+            });
         },
 
         makeConnection: function (cell) {
@@ -107,7 +157,5 @@ exports.makeCell = function (x, y) {
 };
 
 exports.pickRandCell = function () {
-    var x = Math.floor(Math.random() * width),
-        y = Math.floor(Math.random() * height);
-    return rows[y][x];
+    return _.sample(exports.cells());
 };

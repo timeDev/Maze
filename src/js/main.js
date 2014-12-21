@@ -52,6 +52,7 @@ var
     lineLength = 30;
 
 function render() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.beginPath();
     var cells = grid.cells();
     for (var i = 0; i < cells.length; i++) {
@@ -86,6 +87,7 @@ function entrypoint() {
     windowResize();
     ctx = canvas.getContext('2d');
     grid.clear();
+    grid.makeChunk(0, 0);
     generator.run();
     tick();
 }

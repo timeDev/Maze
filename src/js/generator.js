@@ -44,7 +44,6 @@ exports.hunt = function () {
     if (cCell && !(_.isArray(cCell) && cCell.length === 0)) {
         hCell.makeConnection(cCell);
     }
-    console.log(hCell, cCell);
     return hCell;
 };
 
