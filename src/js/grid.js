@@ -64,8 +64,8 @@ exports.makeChunk = function (x, y) {
 
 exports.getCellAt = function (x, y) {
     // Coordinates relative to the chunk start
-    var cx = x % chunkSize,
-        cy = y % chunkSize;
+    var cx = x < 0 ? chunkSize - Math.abs((x + 1) % chunkSize) - 1 : x % chunkSize,
+        cy = y < 0 ? chunkSize - Math.abs((y + 1) % chunkSize) - 1 : y % chunkSize;
     // Coordinates of the chunk in the world
     var wx = Math.floor(x / chunkSize),
         wy = Math.floor(y / chunkSize);
@@ -83,7 +83,12 @@ exports.getCellAt = function (x, y) {
     if (!regions[r][ry] || !regions[r][ry][rx]) {
         return null;
     }
-    return regions[r][ry][rx][cy][cx];
+    var val = regions[r][ry][rx][cy][cx];
+    if (val === undefined) {
+        debugger;
+    }
+    return val;
+    //return regions[r][ry][rx][cy][cx];
 };
 
 exports.cells = function () {

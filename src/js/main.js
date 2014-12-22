@@ -151,6 +151,9 @@ function entrypoint() {
     ctx = canvas.getContext('2d');
     grid.clear();
     grid.makeChunk(0, 0);
+    grid.makeChunk(-1, 0);
+    grid.makeChunk(0, -1);
+    grid.makeChunk(-1, -1);
     generator.run();
     time = Date.now();
     tick();
