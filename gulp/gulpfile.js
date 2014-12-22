@@ -60,15 +60,13 @@ gulp.task('watchify', ['clean'], function () {
     }));
 
     function bundle() {
+        gutil.log('Rebundling');
         return bundler.bundle()
             // log errors if they happen
             .on('error', gutil.log.bind(gutil, 'Browserify Error'))
             .on('log', console.error)
             .pipe(source('bundle.js'))
             .pipe(buffer())
-            .pipe(sourcemaps.init({loadMaps: true}))
-            .pipe(uglify())
-            .pipe(sourcemaps.write('./'))
             .pipe(gulp.dest('../build'));
     }
 
