@@ -41,19 +41,19 @@ function tick() {
         player.moveCooldown -= dt;
     } else {
         var moved = 0;
-        if (keys[keycode.w]) {
+        if (keys[keycode.w] && player.getCell().up) {
             player.position.y--;
             moved = 1;
         }
-        if (keys[keycode.s]) {
+        if (keys[keycode.s] && player.getCell().down) {
             player.position.y++;
             moved = 1;
         }
-        if (keys[keycode.a]) {
+        if (keys[keycode.a] && player.getCell().left) {
             player.position.x--;
             moved = 1;
         }
-        if (keys[keycode.d]) {
+        if (keys[keycode.d] && player.getCell().right) {
             player.position.x++;
             moved = 1;
         }
@@ -129,6 +129,10 @@ function initPlayer() {
     game.player = player = {};
     player.moveCooldown = 1;
     player.position = {x: 0, y: 0};
+
+    player.getCell = function () {
+        return grid.getCellAt(player.position.x, player.position.y);
+    };
 
     window.addEventListener('keydown', function (e) {
         keys[e.which] = true;
