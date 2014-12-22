@@ -34,34 +34,46 @@ function windowResize() {
     canvas.height = window.innerHeight;
 }
 
+function easeQuartInCubeOut(t, b, c, d) {
+    t /= d / 2;
+    if (t < 1) {
+        return c / 2 * t * t * t + b;
+    }
+    t -= 2;
+    return -c / 2 * (t * t * t * t - 2) + b;
+}
+
+function ease(t) {
+    return easeQuartInCubeOut(t, 0, 1, 0.3) - 1;
+}
+
 function tick() {
     var dt = (Date.now() - time) / 1000.0;
     time = Date.now();
     if (player.moveCooldown > 0) {
         player.moveCooldown -= dt;
+        player.animProgress += dt;
     } else {
         var moved = 0;
         if (keys[keycode.w] && player.getCell().up) {
-            player.position.y--;
-            moved = 1;
+            moved = player.animateMove(0, -1);
         }
         if (keys[keycode.s] && player.getCell().down) {
-            player.position.y++;
-            moved = 1;
+            moved = player.animateMove(0, 1);
         }
         if (keys[keycode.a] && player.getCell().left) {
-            player.position.x--;
-            moved = 1;
+            moved = player.animateMove(-1, 0);
         }
         if (keys[keycode.d] && player.getCell().right) {
-            player.position.x++;
-            moved = 1;
+            moved = player.animateMove(1, 0);
         }
         if (moved) {
-            player.moveCooldown = 0.1;
+            player.moveCooldown = 0.3;
+            player.animProgress = 0.0;
+        } else {
+            player.animateMove(0, 0);
         }
     }
-
     render();
     id = requestAnimationFrame(tick);
 }
@@ -82,13 +94,15 @@ var
 function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
-    ctx.translate(window.innerWidth / 2 - (player.position.x + 0.5) * lineLength, window.innerHeight / 2 - (player.position.y + 0.5) * lineLength);
+    var playerPosX = player.pos.x + player.pos.xa * ease(player.animProgress) + 0.5;
+    var playerPosY = player.pos.y + player.pos.ya * ease(player.animProgress) + 0.5;
+    ctx.translate(window.innerWidth / 2 - playerPosX * lineLength, window.innerHeight / 2 - playerPosY * lineLength);
 
     ctx.save();
     ctx.beginPath();
     //ctx.strokeStyle = '';
     //ctx.fillStyle = '';
-    ctx.arc((player.position.x + 0.5) * lineLength, (player.position.y + 0.5) * lineLength, 5, 0, 2 * Math.PI, false);
+    ctx.arc(playerPosX * lineLength, playerPosY * lineLength, 5, 0, 2 * Math.PI, false);
     ctx.fill();
     ctx.stroke();
     ctx.restore();
@@ -128,10 +142,20 @@ var
 function initPlayer() {
     game.player = player = {};
     player.moveCooldown = 1;
-    player.position = {x: 0, y: 0};
+    player.animProgress = 0;
+    player.pos = {x: 0, y: 0, xa: 0, ya: 0};
 
     player.getCell = function () {
-        return grid.getCellAt(player.position.x, player.position.y);
+        return grid.getCellAt(player.pos.x, player.pos.y);
+    };
+
+    player.animateMove = function (x, y) {
+        player.pos.xa = x;
+        player.pos.x += x;
+        player.pos.ya = y;
+        player.pos.y += y;
+        // Just to make it minify better
+        return true;
     };
 
     window.addEventListener('keydown', function (e) {
