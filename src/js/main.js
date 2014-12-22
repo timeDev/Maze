@@ -23,9 +23,10 @@
  */
 /*global require, module, exports */
 var
-    canvas, ctx, id,
+    canvas, ctx, id, player, time,
     grid = require('./grid'),
-    generator = require('./generator');
+    generator = require('./generator'),
+    keycode = require('./keycode');
 
 function windowResize() {
     console.log('window resize');
@@ -34,8 +35,35 @@ function windowResize() {
 }
 
 function tick() {
-    id = requestAnimationFrame(tick);
+    var dt = (Date.now() - time) / 1000.0;
+    time = Date.now();
+    if (player.moveCooldown > 0) {
+        player.moveCooldown -= dt;
+    } else {
+        var moved = 0;
+        if (keys[keycode.w]) {
+            player.position.y--;
+            moved = 1;
+        }
+        if (keys[keycode.s]) {
+            player.position.y++;
+            moved = 1;
+        }
+        if (keys[keycode.a]) {
+            player.position.x--;
+            moved = 1;
+        }
+        if (keys[keycode.d]) {
+            player.position.x++;
+            moved = 1;
+        }
+        if (moved) {
+            player.moveCooldown = 0.1;
+        }
+    }
+
     render();
+    id = requestAnimationFrame(tick);
 }
 
 window.game = {};
@@ -53,6 +81,18 @@ var
 
 function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(window.innerWidth / 2 - (player.position.x + 0.5) * lineLength, window.innerHeight / 2 - (player.position.y + 0.5) * lineLength);
+
+    ctx.save();
+    ctx.beginPath();
+    //ctx.strokeStyle = '';
+    //ctx.fillStyle = '';
+    ctx.arc((player.position.x + 0.5) * lineLength, (player.position.y + 0.5) * lineLength, 5, 0, 2 * Math.PI, false);
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+
     ctx.beginPath();
     var cells = grid.cells();
     for (var i = 0; i < cells.length; i++) {
@@ -79,16 +119,36 @@ function render() {
         }
     }
     ctx.stroke();
+    ctx.restore();
+}
+
+var
+    keys = {};
+
+function initPlayer() {
+    game.player = player = {};
+    player.moveCooldown = 1;
+    player.position = {x: 0, y: 0};
+
+    window.addEventListener('keydown', function (e) {
+        keys[e.which] = true;
+    });
+
+    window.addEventListener('keyup', function (e) {
+        keys[e.which] = false;
+    });
 }
 
 function entrypoint() {
     canvas = document.getElementById('game-canvas');
     window.addEventListener('resize', windowResize, false);
+    initPlayer();
     windowResize();
     ctx = canvas.getContext('2d');
     grid.clear();
     grid.makeChunk(0, 0);
     generator.run();
+    time = Date.now();
     tick();
 }
 
