@@ -3,7 +3,7 @@ git clone $REPO_URL temp
 cd temp
 git checkout gh-pages
 cd ..
-cp -a ./build/. ./temp/
+cp -a ./out/. ./temp/
 cd temp
 git add -A
 git config user.name "Travis Build"

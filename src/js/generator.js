@@ -23,7 +23,8 @@
  */
 /*global require, module, exports */
 var
-    grid = require('./grid');
+    grid = require('./grid'),
+    _ = require('lodash');
 
 exports.hunt = function () {
     var cells = _(grid.cells()).filter(function (cell) {

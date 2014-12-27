@@ -21,33 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 /*global require, module, exports*/
 
+// ====== Default task ======
 var
     gulp = require('gulp'),
     connect = require('gulp-connect');
 
 gulp.task('default', ['build'], function () {
     connect.server({
-        root: '../build'
+        root: '../out'
     })
 });
 
+// ====== Clean task ======
 var
     del = require('del');
 
 gulp.task('clean', function (cb) {
-    del(['../build'], {force: true}, cb);
+    del(['../out'], {force: true}, cb);
 });
 
+// ====== Build tasks ======
 var
     gutil = require('gulp-util'),
     browserify = require('browserify'),
     source = require('vinyl-source-stream'),
     buffer = require('vinyl-buffer'),
     uglify = require('gulp-uglify'),
-    sourcemaps = require('gulp-sourcemaps'),
     watchify = require('watchify');
 
 gulp.task('watchify', ['clean'], function () {
@@ -67,7 +68,7 @@ gulp.task('watchify', ['clean'], function () {
             .on('log', console.error)
             .pipe(source('bundle.js'))
             .pipe(buffer())
-            .pipe(gulp.dest('../build'));
+            .pipe(gulp.dest('../out'));
     }
 
     bundler.on('update', bundle);
@@ -77,7 +78,7 @@ gulp.task('watchify', ['clean'], function () {
 
 gulp.task('build', ['clean', 'watchify'], function () {
     return gulp.src(['../src/**', '!../src/{js,js/**}'])
-        .pipe(gulp.dest('../build'));
+        .pipe(gulp.dest('../out'));
 });
 
 gulp.task('make', ['clean'], function () {
@@ -92,8 +93,8 @@ gulp.task('make', ['clean'], function () {
         .pipe(source('bundle.js'))
         .pipe(buffer())
         .pipe(uglify())
-        .pipe(gulp.dest('../build'));
+        .pipe(gulp.dest('../out'));
 
     gulp.src(['../src/**', '!../src/{js,js/**}'])
-        .pipe(gulp.dest('../build'));
+        .pipe(gulp.dest('../out'));
 });

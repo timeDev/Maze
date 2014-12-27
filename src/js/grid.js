@@ -23,6 +23,7 @@
  */
 /*global require, module, exports */
 var
+    _ = require('lodash'),
     regions,
     chunkSize = 16;
 
